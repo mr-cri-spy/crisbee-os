@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.pyc
+.env
+.venv/
+
+# LLM / models
+models/
+*.gguf
+
+# OS / editor
+.vscode/
+.DS_Store
+
+# Logs
+logs/
