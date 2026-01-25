@@ -2,17 +2,19 @@ import subprocess
 import json
 import os
 
+from memory.memory import init_db, save_memory
+from permissions.permissions import check_permission
+
 MODEL = "qwen2.5:7b-instruct"
 
 SYSTEM_PROMPT = """
 You are Crisbee OS AI Core.
-Your job is to classify user intent and respond ONLY in JSON.
+Classify the user's intent and respond ONLY in JSON.
 
 Allowed intents:
 - LIST_FILES
 - READ_FILE
 - SYSTEM_INFO
-- UNKNOWN
 
 Rules:
 - Do NOT explain
@@ -38,9 +40,13 @@ def call_llm(user_input):
 
     return result.stdout.strip()
 
-def safe_execute(intent_data):
+def safe_execute(intent_data, user_level="read"):
     intent = intent_data.get("intent")
     path = intent_data.get("path")
+
+    # Permission check
+    if not check_permission(intent, user_level):
+        return "Permission denied for this action."
 
     if intent == "LIST_FILES":
         if path is None:
@@ -49,15 +55,16 @@ def safe_execute(intent_data):
 
     elif intent == "SYSTEM_INFO":
         return {
-            "cwd": os.getcwd(),
-            "user": os.getlogin()
+            "user": os.getlogin(),
+            "cwd": os.getcwd()
         }
 
     else:
-        return "Action not allowed or unknown."
+        return "⚠ Unknown or unsupported action."
 
 def main():
-    print("🐝 Crisbee OS AI Core v0.1")
+    init_db()
+    print("Crisbee OS AI Core v0.2")
     print("Type 'exit' to quit\n")
 
     while True:
@@ -70,11 +77,16 @@ def main():
 
         try:
             intent_data = json.loads(raw)
+
+            # Save memory
+            save_memory(user_input, intent_data.get("intent"))
+
             result = safe_execute(intent_data)
             print("Crisbee >", result)
 
-        except Exception as e:
+        except Exception:
             print("Crisbee > Error understanding request")
 
 if __name__ == "__main__":
     main()
+
