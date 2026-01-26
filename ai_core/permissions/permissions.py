@@ -1,13 +1,16 @@
 PERMISSIONS = {
     "LIST_FILES": "read",
-    "READ_FILE": "read",
     "SYSTEM_INFO": "read",
+    "CREATE_FILE": "write",
     "DELETE_FILE": "admin",
-    "INSTALL_APP": "admin"
 }
 
 def check_permission(intent, user_level="read"):
-    required = PERMISSIONS.get(intent, "none")
+    # UNKNOWN or no action → always allow (no execution)
+    if intent not in PERMISSIONS:
+        return True
+
+    required = PERMISSIONS[intent]
 
     levels = ["read", "write", "admin"]
 

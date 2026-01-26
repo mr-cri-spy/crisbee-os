@@ -51,10 +51,15 @@ def call_llm(user_input):
 
 
 def safe_execute(intent_data, user_level="read"):
+    # Always extract intent first
     intent = intent_data.get("intent")
     path = intent_data.get("path")
 
-    # Permission check
+    # Handle unknown or no-op intents safely
+    if not intent or intent == "UNKNOWN":
+        return "I didn't understand that action."
+
+    # Permission check ONLY for real actions
     if not check_permission(intent, user_level):
         return "Permission denied for this action."
 
@@ -69,8 +74,23 @@ def safe_execute(intent_data, user_level="read"):
             "cwd": os.getcwd()
         }
 
-    else:
-        return "⚠ Unknown or unsupported action."
+    elif intent == "CREATE_FILE":
+        if path is None:
+            return "No file path provided."
+        with open(path, "w") as f:
+            f.write("Created by Crisbee OS")
+        return f"File '{path}' created."
+
+    elif intent == "DELETE_FILE":
+        if path is None:
+            return "No file path provided."
+        if os.path.exists(path):
+            os.remove(path)
+            return f"File '{path}' deleted."
+        return "File not found."
+
+    return "Action not supported."
+
 
 def main():
     init_db()

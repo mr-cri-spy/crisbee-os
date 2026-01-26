@@ -22,7 +22,7 @@ class CrisbeeShell(QWidget):
     def __init__(self):
         super().__init__()
 
-        self.setWindowTitle("🐝 Crisbee OS v0.4")
+        self.setWindowTitle(" Crisbee OS v0.4")
         self.setGeometry(300, 200, 600, 400)
 
         layout = QVBoxLayout()
