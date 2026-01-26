@@ -1,5 +1,7 @@
 import sys
 import os
+from PyQt6.QtCore import Qt
+
 
 PROJECT_ROOT = os.path.abspath(
     os.path.join(os.path.dirname(__file__), "../../..")
@@ -23,11 +25,55 @@ class CrisbeeShell(QWidget):
         super().__init__()
 
         self.setWindowTitle(" Crisbee OS v0.5")
+
+        self.setStyleSheet("""
+            QWidget {
+                background-color: #0b0f14;
+                color: #e6e6e6;
+                font-family: Inter, Arial;
+                font-size: 14px;
+            }
+            QLabel {
+                color: #9effff;
+                font-size: 16px;
+                font-weight: bold;
+            }
+            QTextEdit {
+                background-color: #0f1720;
+                color: #b8fefb;
+                border: 1px solid #1f2933;
+                border-radius: 8px;
+                padding: 8px;
+            }
+            QLineEdit {
+                background-color: #020617;
+                color: #ffffff;
+                border: 1px solid #334155;
+                border-radius: 8px;
+                padding: 8px;
+            }
+            QPushButton {
+                background-color: #2563eb;
+                color: #ffffff;
+                border: none;
+                border-radius: 8px;
+                padding: 10px;
+                font-weight: bold;
+            }
+            QPushButton:hover {
+                background-color: #1d4ed8;
+            }
+        """)
+
+        
         self.setGeometry(300, 200, 600, 400)
 
         layout = QVBoxLayout()
 
-        self.label = QLabel("Crisbee AI Shell")
+        self.label = QLabel("Crisbee OS v0.5 Secure AI System Control")
+        self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+
         self.output = QTextEdit()
         self.output.setReadOnly(True)
 
