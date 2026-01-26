@@ -1,7 +1,12 @@
 import sqlite3
+import os
 from datetime import datetime
 
-DB_PATH = "ai-core/memory/crisbee_memory.db"
+# Absolute path to this directory
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+DB_PATH = os.path.join(BASE_DIR, "crisbee_memory.db")
+
 
 def init_db():
     conn = sqlite3.connect(DB_PATH)
