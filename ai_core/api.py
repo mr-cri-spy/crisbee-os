@@ -50,14 +50,26 @@ def process_request(user_input, user_level="admin"):
     result = safe_execute(intent_data, user_level)
     return {"status": "ok", "result": result}
 
+
+import re
+
+def extract_filename(text):
+    match = re.search(r'([a-zA-Z0-9_-]+\.[a-zA-Z0-9]+)', text)
+    if match:
+        return match.group(1)
+    return None
+
+
+
 def rule_based_intent(user_input):
     text = user_input.lower().strip()
+    filename = extract_filename(text)
 
-    if "create file" in text:
-        return {"intent": "CREATE_FILE", "path": "crisbee_test.txt"}
+    if "create file" in text and filename:
+        return {"intent": "CREATE_FILE", "path": filename}
 
-    if "delete file" in text:
-        return {"intent": "DELETE_FILE", "path": "crisbee_test.txt"}
+    if "delete file" in text and filename:
+        return {"intent": "DELETE_FILE", "path": filename}
 
     if "file" in text or "files" in text:
         return {"intent": "LIST_FILES", "path": None}
