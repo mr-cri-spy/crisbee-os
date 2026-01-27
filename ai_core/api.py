@@ -7,6 +7,17 @@ from .memory.memory import save_memory
 pending_action = None
 
 
+
+ALLOWED_APPS = {
+    "firefox": "firefox",
+    "browser": "firefox",
+    "vscode": "code",
+    "code": "code",
+    "terminal": "gnome-terminal"
+}
+
+
+
 def extract_json(text):
     """
     Extract first JSON object from text safely
@@ -61,6 +72,7 @@ def extract_filename(text):
 
 
 
+
 def rule_based_intent(user_input):
     text = user_input.lower().strip()
     filename = extract_filename(text)
@@ -70,6 +82,10 @@ def rule_based_intent(user_input):
 
     if "delete file" in text and filename:
         return {"intent": "DELETE_FILE", "path": filename}
+
+    for key in ALLOWED_APPS:
+        if f"open {key}" in text or f"launch {key}" in text:
+            return {"intent": "LAUNCH_APP", "path": ALLOWED_APPS[key]}
 
     if "file" in text or "files" in text:
         return {"intent": "LIST_FILES", "path": None}

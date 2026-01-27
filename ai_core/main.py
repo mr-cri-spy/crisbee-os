@@ -58,6 +58,15 @@ def safe_execute(intent_data, user_level="read"):
     # Handle unknown or no-op intents safely
     if not intent or intent == "UNKNOWN":
         return "I didn't understand that action."
+    
+
+
+    elif intent == "LAUNCH_APP":
+        if path is None:
+            return "No application specified."
+        subprocess.Popen([path])
+        return f"Launching {path}"
+  
 
     # Permission check ONLY for real actions
     if not check_permission(intent, user_level):
