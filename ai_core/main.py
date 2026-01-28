@@ -29,6 +29,16 @@ JSON format ONLY:
 """
 
 
+SANDBOX_PATHS = [
+    os.path.expanduser("~"),
+    os.path.join(os.path.expanduser("~"), "CrisbeeWorkspace")
+]
+
+os.makedirs(SANDBOX_PATHS[1], exist_ok=True)
+
+
+
+
 def call_llm(user_input):
     prompt = SYSTEM_PROMPT + "\nUser: " + user_input
 
@@ -50,32 +60,19 @@ def call_llm(user_input):
     return raw_output
 
 
-def safe_execute(intent_data, user_level="read"):
-    # Always extract intent first
+def safe_execute(intent_data, user_level="admin"):
     intent = intent_data.get("intent")
     path = intent_data.get("path")
 
-    # Handle unknown or no-op intents safely
     if not intent or intent == "UNKNOWN":
         return "I didn't understand that action."
-    
 
-
-    elif intent == "LAUNCH_APP":
-        if path is None:
-            return "No application specified."
-        subprocess.Popen([path])
-        return f"Launching {path}"
-  
-
-    # Permission check ONLY for real actions
     if not check_permission(intent, user_level):
         return "Permission denied for this action."
 
     if intent == "LIST_FILES":
-        if path is None:
-            path = os.path.expanduser("~")
-        return os.listdir(path)
+        base = os.path.expanduser("~")
+        return os.listdir(base)
 
     elif intent == "SYSTEM_INFO":
         return {
@@ -84,21 +81,53 @@ def safe_execute(intent_data, user_level="read"):
         }
 
     elif intent == "CREATE_FILE":
-        if path is None:
+        if not path:
             return "No file path provided."
+
+        if not is_path_allowed(path):
+            return "Access denied. Path is outside the allowed sandbox."
+
         with open(path, "w") as f:
             f.write("Created by Crisbee OS")
+
         return f"File '{path}' created."
 
     elif intent == "DELETE_FILE":
-        if path is None:
+        if not path:
             return "No file path provided."
+
+        if not is_path_allowed(path):
+            return "Access denied. Path is outside the allowed sandbox."
+
         if os.path.exists(path):
             os.remove(path)
             return f"File '{path}' deleted."
+
         return "File not found."
 
-    return "Action not supported."
+    elif intent == "LAUNCH_APP":
+        if not path:
+            return "No application specified."
+
+        subprocess.Popen([path])
+        return f"Launching {path}"
+
+    else:
+        return "Action not supported."
+
+
+
+
+def is_path_allowed(path):
+    if not path:
+        return False
+    abs_path = os.path.abspath(path)
+
+    for sandbox in SANDBOX_PATHS:
+        if abs_path.startswith(os.path.abspath(sandbox)):
+            return True
+
+    return False
 
 
 def main():
