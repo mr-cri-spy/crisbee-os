@@ -29,12 +29,21 @@ JSON format ONLY:
 """
 
 
+
+CRISBEE_ROOT = os.path.join(os.path.expanduser("~"), "CrisbeeWorkspace")
+os.makedirs(CRISBEE_ROOT, exist_ok=True)
+
+
+
+
+
 SANDBOX_PATHS = [
     os.path.expanduser("~"),
     os.path.join(os.path.expanduser("~"), "CrisbeeWorkspace")
 ]
 
 os.makedirs(SANDBOX_PATHS[1], exist_ok=True)
+
 
 
 
@@ -70,9 +79,10 @@ def safe_execute(intent_data, user_level="admin"):
     if not check_permission(intent, user_level):
         return "Permission denied for this action."
 
-    if intent == "LIST_FILES":
-        base = os.path.expanduser("~")
-        return os.listdir(base)
+    elif intent == "LIST_FILES":
+        return os.listdir(CRISBEE_ROOT)
+
+
 
     elif intent == "SYSTEM_INFO":
         return {
@@ -84,26 +94,29 @@ def safe_execute(intent_data, user_level="admin"):
         if not path:
             return "No file path provided."
 
-        if not is_path_allowed(path):
-            return "Access denied. Path is outside the allowed sandbox."
+        full_path = os.path.join(CRISBEE_ROOT, path)
 
-        with open(path, "w") as f:
+        with open(full_path, "w") as f:
             f.write("Created by Crisbee OS")
 
-        return f"File '{path}' created."
+        return f"File '{path}' created inside CrisbeeWorkspace."
+
+
+
 
     elif intent == "DELETE_FILE":
         if not path:
             return "No file path provided."
 
-        if not is_path_allowed(path):
-            return "Access denied. Path is outside the allowed sandbox."
+        full_path = os.path.join(CRISBEE_ROOT, path)
 
-        if os.path.exists(path):
-            os.remove(path)
-            return f"File '{path}' deleted."
+        if os.path.exists(full_path):
+            os.remove(full_path)
+            return f"File '{path}' deleted from CrisbeeWorkspace."
 
-        return "File not found."
+        return "File not found in CrisbeeWorkspace."
+
+
 
     elif intent == "LAUNCH_APP":
         if not path:
