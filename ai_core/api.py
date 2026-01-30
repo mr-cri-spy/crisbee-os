@@ -62,6 +62,13 @@ def process_request(user_input, user_level="admin"):
     return {"status": "ok", "result": result}
 
 
+
+    if intent_data["intent"] in ["LAUNCH_APP", "CREATE_FILE", "DELETE_FILE"]:
+    save_memory(intent_data["intent"], intent_data["path"])
+
+
+
+
 import re
 
 def extract_filename(text):

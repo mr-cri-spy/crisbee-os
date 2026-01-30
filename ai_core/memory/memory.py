@@ -14,20 +14,42 @@ def init_db():
     c.execute("""
         CREATE TABLE IF NOT EXISTS memory (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_input TEXT,
             intent TEXT,
+            target TEXT,
             timestamp TEXT
         )
     """)
     conn.commit()
     conn.close()
 
-def save_memory(user_input, intent):
+
+
+
+
+def save_memory(intent, target):
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute(
-        "INSERT INTO memory (user_input, intent, timestamp) VALUES (?, ?, ?)",
-        (user_input, intent, datetime.now().isoformat())
+        "INSERT INTO memory (intent, target, timestamp) VALUES (?, ?, ?)",
+        (intent, target, datetime.now().isoformat())
     )
     conn.commit()
     conn.close()
+
+
+def most_frequent_targets(intent, limit=3):
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("""
+        SELECT target, COUNT(*) as count
+        FROM memory
+        WHERE intent = ?
+        GROUP BY target
+        ORDER BY count DESC
+        LIMIT ?
+    """, (intent, limit))
+    results = c.fetchall()
+    conn.close()
+    return [r[0] for r in results]
+
+
