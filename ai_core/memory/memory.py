@@ -26,7 +26,7 @@ def init_db():
 
 
 
-def save_memory(intent, target):
+def save_memory(user, intent, target):
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute(
@@ -53,3 +53,10 @@ def most_frequent_targets(intent, limit=3):
     return [r[0] for r in results]
 
 
+CREATE TABLE IF NOT EXISTS memory (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user TEXT,
+    intent TEXT,
+    target TEXT,
+    timestamp TEXT
+)

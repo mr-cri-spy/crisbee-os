@@ -1,22 +1,10 @@
+pending_action = None
 
 import json
 import re
 from .main import call_llm, safe_execute
 from .memory.memory import save_memory
-
-pending_action = None
-
-
-
-ALLOWED_APPS = {
-    "firefox": "firefox",
-    "browser": "firefox",
-    "vscode": "code",
-    "code": "code",
-    "terminal": "gnome-terminal"
-}
-
-
+from .memory.profile import load_profile
 
 def extract_json(text):
     """
@@ -27,8 +15,11 @@ def extract_json(text):
         return None
     return match.group(0)
 
-def process_request(user_input, user_level="admin"):
+def process_request(user_input, user_level="read"):
     global pending_action
+    profile = load_profile()
+    current_user = profile["user"]
+    
 
     text = user_input.lower().strip()
 
@@ -56,6 +47,13 @@ def process_request(user_input, user_level="admin"):
             "status": "ok",
             "result": "Are you sure you want to perform this action? Type yes to confirm."
         }
+    
+    if "who am i" in text:
+        return {"intent": "WHOAMI", "path": None}
+    elif intent == "WHOAMI":
+        return f"You are logged in as {current_user}"
+
+
 
     # Safe actions
     result = safe_execute(intent_data, user_level)
@@ -63,45 +61,4 @@ def process_request(user_input, user_level="admin"):
 
 
 
-    if intent_data["intent"] in ["LAUNCH_APP", "CREATE_FILE", "DELETE_FILE"]:
-        save_memory(intent_data["intent"], intent_data["path"])
-
-
-
-
-import re
-
-def extract_filename(text):
-    match = re.search(r'([a-zA-Z0-9_-]+\.[a-zA-Z0-9]+)', text)
-    if match:
-        return match.group(1)
-    return None
-
-
-
-
-def rule_based_intent(user_input):
-    text = user_input.lower().strip()
-    filename = extract_filename(text)
-
-    if "help" in text or "what can you do" in text:
-        return {"intent": "HELP", "path": None}
-
-    if "create file" in text and filename:
-        return {"intent": "CREATE_FILE", "path": filename}
-
-    if "delete file" in text and filename:
-        return {"intent": "DELETE_FILE", "path": filename}
-
-    for key in ALLOWED_APPS:
-        if f"open {key}" in text or f"launch {key}" in text:
-            return {"intent": "LAUNCH_APP", "path": ALLOWED_APPS[key]}
-
-    if "file" in text or "files" in text:
-        return {"intent": "LIST_FILES", "path": None}
-
-    if "system" in text or "info" in text:
-        return {"intent": "SYSTEM_INFO", "path": None}
-
-    return {"intent": "UNKNOWN", "path": None}
 
