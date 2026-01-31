@@ -74,25 +74,20 @@ def safe_execute(intent_data, user_level="admin"):
     path = intent_data.get("path")
 
     if not intent or intent == "UNKNOWN":
-        return "I didn't understand that action."
+        return "I didn't understand that action. You can type help to see what I support."
 
     if not check_permission(intent, user_level):
         return "Permission denied for this action."
 
-    elif intent == "LIST_FILES":
-        return os.listdir(CRISBEE_ROOT)
-
-
-    elif intent == "HELP":
+    if intent == "HELP":
         return (
             "I can manage files inside CrisbeeWorkspace, "
-            "launch approved applications, and respond to system queries. "
+            "launch approved applications, and answer system queries. "
             "I always ask before destructive actions and refuse unsafe requests."
-	    )
+        )
 
-
-
-
+    elif intent == "LIST_FILES":
+        return os.listdir(CRISBEE_ROOT)
 
     elif intent == "SYSTEM_INFO":
         return {
@@ -101,51 +96,24 @@ def safe_execute(intent_data, user_level="admin"):
         }
 
     elif intent == "CREATE_FILE":
-        if not path:
-            return "No file path provided."
-
         full_path = os.path.join(CRISBEE_ROOT, path)
-
         with open(full_path, "w") as f:
             f.write("Created by Crisbee OS")
-
-        return f"File '{path}' created inside CrisbeeWorkspace."
-
-
-
+        return f"File '{path}' created."
 
     elif intent == "DELETE_FILE":
-        if not path:
-            return "No file path provided."
-
         full_path = os.path.join(CRISBEE_ROOT, path)
-
         if os.path.exists(full_path):
             os.remove(full_path)
-            return f"File '{path}' deleted from CrisbeeWorkspace."
-
-        return "File not found in CrisbeeWorkspace."
-
-
+            return f"File '{path}' deleted."
+        return "File not found."
 
     elif intent == "LAUNCH_APP":
-        if not path:
-            return "No application specified."
-
         subprocess.Popen([path])
         return f"Launching {path}"
 
     else:
         return "Action not supported."
-
-
-
-    elif intent == "HELP":
-        return (
-            "I can manage files inside CrisbeeWorkspace, "
-            "launch approved applications, and respond to system queries. "
-            "I always ask before destructive actions and refuse unsafe requests.")
-
 
 
 
