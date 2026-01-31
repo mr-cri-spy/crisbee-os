@@ -61,10 +61,8 @@ def process_request(user_input, user_level="admin"):
     result = safe_execute(intent_data, user_level)
     return {"status": "ok", "result": result}
 
-
-
     if intent_data["intent"] in ["LAUNCH_APP", "CREATE_FILE", "DELETE_FILE"]:
-        save_memory(intent_data["intent"], intent_data["path"])
+    save_memory(intent_data["intent"], intent_data["path"])
 
 
 
@@ -101,5 +99,4 @@ def rule_based_intent(user_input):
         return {"intent": "SYSTEM_INFO", "path": None}
 
     return {"intent": "UNKNOWN", "path": None}
-
 
