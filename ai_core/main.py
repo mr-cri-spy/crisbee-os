@@ -83,6 +83,16 @@ def safe_execute(intent_data, user_level="admin"):
         return os.listdir(CRISBEE_ROOT)
 
 
+    elif intent == "HELP":
+        return (
+            "I can manage files inside CrisbeeWorkspace, "
+            "launch approved applications, and respond to system queries. "
+            "I always ask before destructive actions and refuse unsafe requests."
+	    )
+
+
+
+
 
     elif intent == "SYSTEM_INFO":
         return {
@@ -131,11 +141,10 @@ def safe_execute(intent_data, user_level="admin"):
 
 
     elif intent == "HELP":
-    return (
-        "I can manage files inside CrisbeeWorkspace, "
-        "launch approved applications, and respond to system queries. "
-        "I always ask before destructive actions and refuse unsafe requests."
-    )
+        return (
+            "I can manage files inside CrisbeeWorkspace, "
+            "launch approved applications, and respond to system queries. "
+            "I always ask before destructive actions and refuse unsafe requests.")
 
 
 
