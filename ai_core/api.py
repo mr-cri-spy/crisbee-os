@@ -83,10 +83,9 @@ def extract_filename(text):
 def rule_based_intent(user_input):
     text = user_input.lower().strip()
     filename = extract_filename(text)
-    
+
     if "help" in text or "what can you do" in text:
         return {"intent": "HELP", "path": None}
-
 
     if "create file" in text and filename:
         return {"intent": "CREATE_FILE", "path": filename}
@@ -106,6 +105,3 @@ def rule_based_intent(user_input):
 
     return {"intent": "UNKNOWN", "path": None}
 
-
-     if "help" in text or "what can you do" in text:
-        return {"intent": "HELP", "path": None}
