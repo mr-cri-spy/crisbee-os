@@ -130,6 +130,16 @@ def safe_execute(intent_data, user_level="admin"):
 
 
 
+    elif intent == "HELP":
+    return (
+        "I can manage files inside CrisbeeWorkspace, "
+        "launch approved applications, and respond to system queries. "
+        "I always ask before destructive actions and refuse unsafe requests."
+    )
+
+
+
+
 
 def is_path_allowed(path):
     if not path:
