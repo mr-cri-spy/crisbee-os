@@ -8,12 +8,14 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, "crisbee_memory.db")
 
 
+
 def init_db():
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute("""
         CREATE TABLE IF NOT EXISTS memory (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user TEXT,
             intent TEXT,
             target TEXT,
             timestamp TEXT
@@ -30,8 +32,8 @@ def save_memory(user, intent, target):
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute(
-        "INSERT INTO memory (intent, target, timestamp) VALUES (?, ?, ?)",
-        (intent, target, datetime.now().isoformat())
+        "INSERT INTO memory (user , intent, target, timestamp) VALUES (?, ?, ?)",
+        (user, intent, target, datetime.now().isoformat())
     )
     conn.commit()
     conn.close()
