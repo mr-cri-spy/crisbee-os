@@ -99,7 +99,8 @@ class CrisbeeShell(QWidget):
 
         response = process_request(user_input)
 
-        self.output.append(f"Crisbee: {response['result']}\n")
+        self.output.append(f"Crisbee: {response.get('result', 'No response')}\n")
+
         self.input.clear()
 
 

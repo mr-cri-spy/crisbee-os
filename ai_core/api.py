@@ -61,50 +61,44 @@ def rule_based_intent(user_input):
 
 
 
-def process_request(user_input, user_level="read"):
+
+
+def process_request(user_input):
     global pending_action
-    profile = load_profile()
-    current_user = profile["user"]
-    
 
-    text = user_input.lower().strip()
+    # Always normalize input
+    text = user_input.strip().lower()
 
-    # Confirmation step
+    # Resolve intent once
+    intent_data = rule_based_intent(text)
+    intent = intent_data.get("intent")
+    path = intent_data.get("path")
+
+    # Handle confirmation state
     if pending_action:
         if text in ["yes", "confirm", "ok"]:
-            result = safe_execute(pending_action, user_level)
+            result = safe_execute(pending_action)
             pending_action = None
-            return {"status": "ok", "result": result}
+            return {"result": result}
         else:
             pending_action = None
-            return {"status": "ok", "result": "Action cancelled."}
+            return {"result": "Action cancelled."}
 
-    # PURE rule-based intent (v0.5)
-    intent_data = rule_based_intent(user_input)
+    # WHOAMI handled here (no execution)
+    if intent == "WHOAMI":
+        profile = load_profile()
+        return {"result": f"You are logged in as {profile['user']}"}
 
-    # Guard UNKNOWN immediately
-    if intent_data["intent"] == "UNKNOWN":
-        return {"status": "ok", "result": "I didn't understand that action."}
+    # Unknown intent
+    if intent == "UNKNOWN":
+        return {"result": "I didn't understand that action. Type help to see what I support."}
 
-    # Require confirmation for dangerous actions
-    if intent_data["intent"] in ["CREATE_FILE", "DELETE_FILE"]:
+    # Confirmation required for destructive actions
+    if intent in ["CREATE_FILE", "DELETE_FILE"]:
         pending_action = intent_data
-        return {
-            "status": "ok",
-            "result": "Are you sure you want to perform this action? Type yes to confirm."
-        }
-    
-    if "who am i" in text:
-        return {"intent": "WHOAMI", "path": None}
-    elif intent == "WHOAMI":
-        return f"You are logged in as {current_user}"
+        return {"result": "Are you sure you want to perform this action? Type yes to confirm."}
 
-
-
-    # Safe actions
-    result = safe_execute(intent_data, user_level)
-    return {"status": "ok", "result": result}
-
-
-
+    # Normal execution
+    result = safe_execute(intent_data)
+    return {"result": result}
 
