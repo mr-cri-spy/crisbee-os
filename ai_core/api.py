@@ -45,19 +45,17 @@ def process_request(user_input):
     intent = intent_data.get("intent")
 
     if pending_action is not None:
-        if user_input.lower() in ["yes", "confirm"]:
-            action = pending_action
-            pending_action = None
+        action = pending_action
+        pending_action = None
 
+        if user_input.lower() in ["yes", "confirm"]:
             result = safe_execute(action, role)
+
             save_memory(user, action["intent"], action.get("path"))
             log_audit(user, role, action["intent"], action.get("path"), "ALLOWED")
 
             return {"result": result}
         else:
-            action = pending_action
-            pending_action = None
-
             log_audit(user, role, action["intent"], action.get("path"), "CANCELLED")
             return {"result": "Action cancelled."}
     
