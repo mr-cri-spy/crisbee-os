@@ -44,17 +44,25 @@ def process_request(user_input):
     intent_data = rule_based_intent(user_input)
     intent = intent_data.get("intent")
 
-    if pending_action:
+    if pending_action is not None:
         if user_input.lower() in ["yes", "confirm"]:
-            result = safe_execute(pending_action, role)
-            save_memory(user, pending_action["intent"], pending_action["path"])
+            action = pending_action
             pending_action = None
+
+            result = safe_execute(action, role)
+            save_memory(user, action["intent"], action.get("path"))
+            log_audit(user, role, action["intent"], action.get("path"), "ALLOWED")
+
             return {"result": result}
         else:
+            action = pending_action
             pending_action = None
-            return {"result": "Action cancelled."}
-            log_audit(user, role, pending_action["intent"], pending_action["path"], "CANCELLED")
 
+            log_audit(user, role, action["intent"], action.get("path"), "CANCELLED")
+            return {"result": "Action cancelled."}
+    
+
+    
     if intent == "WHOAMI":
         return {"result": f"You are logged in as {user} with role {role}"}
 

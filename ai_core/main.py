@@ -24,8 +24,12 @@ def check_permission(intent, role):
     return required == "user"
 
 def safe_execute(intent_data, role):
+    if not intent_data:
+        return "No action to execute."
+
     intent = intent_data.get("intent")
     path = intent_data.get("path")
+    
     
 
     if not check_permission(intent, role):
