@@ -1,7 +1,6 @@
 from .main import safe_execute
-from .memory.memory import save_memory, init_db
-from .memory.profile import load_profile
 from .memory.memory import save_memory, init_db, log_audit
+from .memory.profile import load_profile
 
 pending_action = None
 
@@ -25,14 +24,14 @@ def rule_based_intent(user_input):
     if "show files" in text or "list files" in text:
         return {"intent": "LIST_FILES", "path": None}
 
-    if text.startswith("open "):
-        return {"intent": "LAUNCH_APP", "path": text.split(maxsplit=1)[1]}
-    
     if "show audit" in text:
         return {"intent": "SHOW_AUDIT", "path": None}
 
+    if text.startswith("open "):
+        return {"intent": "LAUNCH_APP", "path": text.split(maxsplit=1)[1]}
 
     return {"intent": "UNKNOWN", "path": None}
+
 
 def process_request(user_input):
     global pending_action
@@ -44,6 +43,7 @@ def process_request(user_input):
     intent_data = rule_based_intent(user_input)
     intent = intent_data.get("intent")
 
+    # ----- Confirmation Handling -----
     if pending_action is not None:
         action = pending_action
         pending_action = None
@@ -58,22 +58,27 @@ def process_request(user_input):
         else:
             log_audit(user, role, action["intent"], action.get("path"), "CANCELLED")
             return {"result": "Action cancelled."}
-    
 
-    
+    # ----- WHOAMI -----
     if intent == "WHOAMI":
         return {"result": f"You are logged in as {user} with role {role}"}
 
+    # ----- UNKNOWN -----
     if intent == "UNKNOWN":
         return {"result": "I didn't understand that action. Type help."}
 
+    # ----- Destructive Actions -----
     if intent in ["CREATE_FILE", "DELETE_FILE"]:
         pending_action = intent_data
         return {"result": "Are you sure? Type yes to confirm."}
 
-    result = safe_execute(pending_action, role)
-    log_audit(user, role, intent, intent_data.get("path"), "ALLOWED")
-    save_memory(user, pending_action["intent"], pending_action["path"])
-    log_audit(user, role, pending_action["intent"], pending_action["path"], "ALLOWED")
+    # ----- Normal Execution -----
+    result = safe_execute(intent_data, role)
 
-    log_audit(user, role, pending_action["intent"], pending_action["path"], "ALLOWED")
+    # ----- Audit Logging -----
+    if result == "This action requires admin privileges.":
+        log_audit(user, role, intent, intent_data.get("path"), "DENIED")
+    else:
+        log_audit(user, role, intent, intent_data.get("path"), "ALLOWED")
+
+    return {"result": result}

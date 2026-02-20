@@ -79,4 +79,4 @@ def safe_execute(intent_data, role):
     
     return "Action not supported."
 
-    log_audit(user, role, intent, intent_data.get("path"), "DENIED")
+    
