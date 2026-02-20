@@ -47,4 +47,3 @@ def most_frequent_targets(user, intent, limit=3):
     rows = c.fetchall()
     conn.close()
     return [r[0] for r in rows]
-
