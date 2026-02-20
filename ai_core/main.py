@@ -26,6 +26,7 @@ def check_permission(intent, role):
 def safe_execute(intent_data, role):
     intent = intent_data.get("intent")
     path = intent_data.get("path")
+    
 
     if not check_permission(intent, role):
         return "This action requires admin privileges."
@@ -58,5 +59,20 @@ def safe_execute(intent_data, role):
     elif intent == "LAUNCH_APP":
         subprocess.Popen([path])
         return f"Launching {path}"
+    
+    elif intent == "SHOW_AUDIT":
+        import sqlite3
+        from .memory.memory import DB_PATH
 
+        conn = sqlite3.connect(DB_PATH)
+        c = conn.cursor()
+        c.execute("SELECT user, role, intent, target, status, timestamp FROM audit_log ORDER BY id DESC LIMIT 10")
+        rows = c.fetchall()
+        conn.close()
+
+        return str(rows)
+    
+    
     return "Action not supported."
+
+    log_audit(user, role, intent, intent_data.get("path"), "DENIED")

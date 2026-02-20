@@ -20,8 +20,35 @@ def init_db():
             timestamp TEXT
         )
     """)
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS audit_log (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user TEXT,
+            role TEXT,
+            intent TEXT,
+            target TEXT,
+            status TEXT,
+            timestamp TEXT
+        )
+    """)   
+
+
+
     conn.commit()
     conn.close()
+
+
+def log_audit(user, role, intent, target, status):
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute(
+        "INSERT INTO audit_log (user, role, intent, target, status, timestamp) VALUES (?, ?, ?, ?, ?, ?)",
+        (user, role, intent, target, status, datetime.now().isoformat())
+    )
+    conn.commit()
+    conn.close()
+
+
 
 def save_memory(user, intent, target):
     conn = sqlite3.connect(DB_PATH)

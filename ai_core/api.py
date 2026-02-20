@@ -1,6 +1,7 @@
 from .main import safe_execute
 from .memory.memory import save_memory, init_db
 from .memory.profile import load_profile
+from .memory.memory import save_memory, init_db, log_audit
 
 pending_action = None
 
@@ -26,6 +27,10 @@ def rule_based_intent(user_input):
 
     if text.startswith("open "):
         return {"intent": "LAUNCH_APP", "path": text.split(maxsplit=1)[1]}
+    
+    if "show audit" in text:
+        return {"intent": "SHOW_AUDIT", "path": None}
+
 
     return {"intent": "UNKNOWN", "path": None}
 
@@ -48,6 +53,7 @@ def process_request(user_input):
         else:
             pending_action = None
             return {"result": "Action cancelled."}
+            log_audit(user, role, pending_action["intent"], pending_action["path"], "CANCELLED")
 
     if intent == "WHOAMI":
         return {"result": f"You are logged in as {user} with role {role}"}
@@ -59,5 +65,9 @@ def process_request(user_input):
         pending_action = intent_data
         return {"result": "Are you sure? Type yes to confirm."}
 
-    result = safe_execute(intent_data, role)
-    return {"result": result}
+    result = safe_execute(pending_action, role)
+    log_audit(user, role, intent, intent_data.get("path"), "ALLOWED")
+    save_memory(user, pending_action["intent"], pending_action["path"])
+    log_audit(user, role, pending_action["intent"], pending_action["path"], "ALLOWED")
+
+    log_audit(user, role, pending_action["intent"], pending_action["path"], "ALLOWED")
